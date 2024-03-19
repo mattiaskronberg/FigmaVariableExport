@@ -1,0 +1,62 @@
+<head>
+  <style>
+    .checkboxes {
+      display: inline-block;
+    }
+
+    .colCheckbox {
+      border-radius: 15%;
+    }
+  </style>
+</head>
+<h2>Getinge Colors</h2>
+<div id="checkboxContainer">
+
+</div>
+<p>Count: <input id="count" value="5"></p>
+<button id="export">Export</button>
+<script>
+
+  onmessage = (event) => {
+
+    const { type, data } = event.data.pluginMessage;
+
+    switch (type) {
+      case "variableCollectionsFound":
+        console.log("Variable collection found. Count:", data.length);
+
+        const container = document.getElementById('checkboxContainer');
+        container.innerHTML = '';
+
+        data.forEach(collection => {
+
+          console.log(collection);
+          const label = document.createElement('label');
+          label.className = "checkboxes";
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'colCheckbox';
+          checkbox.value = collection.id;
+          label.appendChild(checkbox);
+          label.append(collection.name);
+          container.appendChild(label);
+        });
+
+        break;
+      case "noCollectionFound":
+        console.log("No collection found");
+        break;
+    }
+  }
+
+  document.getElementById('export').onclick = () => {
+    const selectedCollections = Array.from(document.querySelectorAll('.colCheckbox:checked'))
+      .map(checkbox => checkbox.value);
+    parent.postMessage({ pluginMessage: { type: 'export-selected-collections', selectedCollections } }, '*');
+  }
+
+  document.getElementById('cancel').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+  }
+
+</script>
