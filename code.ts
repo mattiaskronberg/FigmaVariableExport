@@ -5,16 +5,12 @@
 // the *figma document* via the figma global object.
 // You can access browser APIs in the <script> tag inside "ui.html" which has a
 // full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
+//import { rgbToHex, isInCollection } from "./utility";
+
 
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__);
 
-interface ExportCollectionsMessage {
-  type: 'export-selected-collections';
-  selectedItems: string[];
-}
-
-var variableCollections: VariableCollection[];
 
 // Loads the different variable collections and returns them to the UI
 async function populateCheckboxes() {
@@ -42,48 +38,50 @@ figma.on("run", () => {
   populateCheckboxes();
 });
 
+// Exports the selected collections
 async function exportSelectedCollections(selectedCollections: string[]) {
-  console.log(selectedCollections);
+  
+  var collectionsToExport: { name: string, variables: string[] }[] = [];
+
   const allVariableCollections = await figma.variables.getLocalVariableCollectionsAsync();
-  const variables = await figma.variables.getLocalVariablesAsync();
 
-  /*
-      variables.forEach(v => {
-        if (selectedCollections.includes(v.variableCollectionId)) {
-          
-          console.log(v.name.split("/").slice(-1) + " : " + v.valuesByMode[0]);
-        }
-      })*/
-
-  allVariableCollections.forEach(collection => {
-
+  // Loop through all variables collections and process the selected ones
+  for (const collection of allVariableCollections) {
     // Check if collection was selected
     if (isInCollection(collection, selectedCollections)) {
       var modes = collection.modes;
       var ids = collection.variableIds;
 
       // Loop through the modes in the collection
-      modes.forEach(m => {
+      for (const m of modes) {
+        const modeName = m.name;
+        var variables: string[] = [];
+
         // Loop through the variables in the collection
-        ids.forEach(async id => {
+        for (const id of ids) {
           // Get the specific variable
           var v = await figma.variables.getVariableByIdAsync(id);
           if (v != null) {
             // Get the string values for the variables
-            console.log(v.name + " : " + await getVariableString(v, m))
+            var value = await getVariableString(v, m);
+            variables.push(`"${v.name}" : "${value}"`); // Corrected the quotation mark at the end
           }
+        }
 
-        })
-      })
+        var result = { name: `${collection.name}-${modeName}`, variables };
+        collectionsToExport.push(result);
+      }
     }
-  });
+  }
+
+  figma.ui.postMessage({ type: "collectionsReady", data: collectionsToExport });
 }
 
-async function getVariableString(v: Variable, mode: { name: string, modeId: string }) {
+async function getVariableString(v: Variable, mode: { name: string, modeId: string }) : Promise<string> {
   var value = v.valuesByMode[mode.modeId];
   const converted = await variableToString(value, v.resolvedType);
   console.log("Everything is converted now. The variable name is " + v.name + " and the value is " + converted);
-  return converted;
+  return converted as string;
 
 }
 
@@ -107,11 +105,13 @@ async function variableToString(v: VariableValue, resolvedType: VariableResolved
         return rgbToHex(r, g, b, a);
       case "BOOLEAN":
         return v as boolean;
+      default:
+        // This will likely happen when Figma introduces font/type variables
+        return v;
     }
-
-    return v;
   }
 }
+
 
 // Utility method for converting rgb to a hex string
 function rgbToHex(r: number, g: number, b: number, a: number) {
@@ -128,9 +128,7 @@ function rgbToHex(r: number, g: number, b: number, a: number) {
   const hex = [toHex(r), toHex(g), toHex(b)].join("");
   return `#${hex}`;
 }
-
-
+// Utility method for checking if item is in collection
 function isInCollection(collection: VariableCollection, selected: string[]) {
   return selected.findIndex((x) => collection.id == x) != -1;
 }
-

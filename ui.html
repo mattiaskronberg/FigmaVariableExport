@@ -29,7 +29,6 @@
         container.innerHTML = '';
 
         data.forEach(collection => {
-
           console.log(collection);
           const label = document.createElement('label');
           label.className = "checkboxes";
@@ -46,6 +45,15 @@
       case "noCollectionFound":
         console.log("No collection found");
         break;
+
+      case "collectionsReady":
+        console.log("Collections ready!");
+        data.forEach(c => {
+          console.log("VARIABLES:");
+          console.log(c.variables);
+          downloadTextFile(c.variables, c.name);
+        })
+        break;
     }
   }
 
@@ -57,6 +65,36 @@
 
   document.getElementById('cancel').onclick = () => {
     parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+  }
+
+  function downloadTextFile(textContents, filename) {
+    // Join the array elements into a single string with newline characters
+    const text = textContents.join('\n');
+
+    // Create a blob with the text content and specify the MIME type
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+
+    // Create an anchor element and set the href to the blob URL
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename; // Set the desired file name
+
+    // Append the anchor to the body, click it to trigger the download, and then remove it
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function zipFiles() {
+    const zip = new JSZip();
+    
+  }
+
+  function downloadFile() {
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
 </script>
