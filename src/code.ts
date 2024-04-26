@@ -2,7 +2,7 @@
 
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__);
-figma.ui.resize(400, 240);
+figma.ui.resize(400, 340);
 
 
 // Loads the different variable collections and returns them to the UI
@@ -50,6 +50,8 @@ async function exportSelectedCollections(selectedCollections: string[]) {
       var ids = collection.variableIds;
 
       // Loop through the modes in the collection
+      
+      // Todo: This likely needs to be refactored to handle multiple modes
       for (const m of modes) {
         const modeName = m.name;
         var variables: string[] = [];

@@ -45,6 +45,11 @@
       cursor: pointer;
     }
 
+    #export:hover {
+      background-color: #6679a3;
+      
+    }
+
     #checkboxContainer {
       display: flex;
       flex-direction: column;
@@ -53,6 +58,7 @@
 
     .checkboxes {
       display: inline-block;
+      cursor: pointer;
     }
 
     .colCheckbox {
@@ -65,14 +71,22 @@
       padding: 24px;
     }
 
+    #instructions {
+      margin-bottom: 20px;
+    }
+
   </style>
 </head>
 <h2>Export .scheme</h2>
-<div id="checkboxContainer">
-
+<div id="instructions">
+  This plugin is a bit of a lie. It will export an ordinary text file, but that one can just be renamed to .scheme.
+  <br><br>
+  Choose which collection to export:
 </div>
-<div id="buttons">
+<div id="checkboxContainer">
+</div>
 
+<div id="buttons">
   <button id="export">Export</button>
 </div>
 <script>
