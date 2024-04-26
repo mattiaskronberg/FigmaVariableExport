@@ -1,12 +1,4 @@
-// This plugin will open a window to prompt the user to enter a number, and
-// it will then create that many rectangles on the screen.
 
-// This file holds the main code for plugins. Code in this file has access to
-// the *figma document* via the figma global object.
-// You can access browser APIs in the <script> tag inside "ui.html" which has a
-// full browser environment (See https://www.figma.com/plugin-docs/how-plugins-run).
-//import { rgbToHex, isInCollection } from "./utility";
- 
 
 // This shows the HTML page in "ui.html".
 figma.showUI(__html__);
@@ -40,6 +32,10 @@ figma.on("run", () => {
 });
 
 // Exports the selected collections
+/**
+ * Exports the selected variable collections.
+ * @param selectedCollections - An array of collection names to export.
+ */
 async function exportSelectedCollections(selectedCollections: string[]) {
   
   var collectionsToExport: { name: string, variables: string[] }[] = [];

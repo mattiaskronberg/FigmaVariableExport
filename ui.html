@@ -1,3 +1,23 @@
+<!--
+  This HTML file represents a user interface for exporting .scheme files.
+  It contains a set of styles for the UI elements, checkboxes for selecting variable collections,
+  and buttons for exporting and canceling the export process.
+
+  The script section handles the communication with the parent window and performs the necessary actions
+  based on the received messages. It dynamically creates checkboxes for each variable collection found,
+  allows the user to select collections, and triggers the export process when the "Export" button is clicked.
+
+  Functions:
+  - onmessage: Handles the incoming messages from the parent window.
+  - getBlob: Creates a Blob object from the provided text contents.
+  - downloadFile: Downloads a file using the provided Blob object and filename.
+
+  Event Listeners:
+  - export button click: Triggers the export process by sending a message to the parent window with the selected collections.
+  - cancel button click: Cancels the export process by sending a message to the parent window.
+
+  Note: This code assumes the presence of an external font family called 'Inter'.
+-->
 <head>
 
   <style>
@@ -58,11 +78,21 @@
 <script>
 
 
+  /**
+   * This script handles the message event and performs different actions based on the type of message received.
+   * 
+   * @param {MessageEvent} event - The message event object.
+   * @returns {Promise<void>} - A promise that resolves when the message event is handled.
+   */
   onmessage = async (event) => {
-
     const { type, data } = event.data.pluginMessage;
 
     switch (type) {
+      /**
+       * Renders the variable collections found in the data array.
+       * Populates the checkbox container with radio buttons for each collection.
+       * @param {Array} data - The array of variable collections.
+       */
       case "variableCollectionsFound":
         console.log("Variable collection found. Count:", data.length);
 
@@ -127,6 +157,12 @@
     return blob;
   }
 
+  /**
+   * Downloads a file with the specified name.
+   * 
+   * @param {Blob} file - The file to be downloaded.
+   * @param {string} filename - The desired name of the downloaded file.
+   */
   function downloadFile(file, filename) {
     // Create an anchor element and set the href to the blob URL
     const a = document.createElement('a');
