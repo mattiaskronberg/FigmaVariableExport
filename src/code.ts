@@ -37,39 +37,31 @@ figma.on("run", () => {
  * @param selectedCollections - An array of collection names to export.
  */
 async function exportSelectedCollections(selectedCollections: string[]) {
-  
-  var collectionsToExport: { name: string, variables: string[] }[] = [];
+  const collectionsToExport: { name: string, variables: string[] }[] = [];
 
   const allVariableCollections = await figma.variables.getLocalVariableCollectionsAsync();
 
-  // Loop through all variables collections and process the selected ones
   for (const collection of allVariableCollections) {
-    // Check if collection was selected
     if (isInCollection(collection, selectedCollections)) {
-      var modes = collection.modes;
-      var ids = collection.variableIds;
+      const modes = collection.modes;
+      const ids = collection.variableIds;
 
-      // Loop through the modes in the collection
-      
-      // Todo: This likely needs to be refactored to handle multiple modes
-      for (const m of modes) {
-        const modeName = m.name;
-        var variables: string[] = [];
+      const variables: string[] = [];
 
-        // Loop through the variables in the collection
+      for (const mode of modes) {
+        const modeName = mode.name;
+
         for (const id of ids) {
-          // Get the specific variable
-          var v = await figma.variables.getVariableByIdAsync(id);
-          if (v != null) {
-            // Get the string values for the variables
-            var value = await getVariableString(v, m);
-            variables.push(`"${v.name}" : "${value}"`); // Corrected the quotation mark at the end
+          const variable = await figma.variables.getVariableByIdAsync(id);
+          if (variable != null) {
+            const value = await getVariableString(variable, mode);
+            variables.push(`"${variable.name}" : "${value}"`);
           }
         }
-
-        var result = { name: `${collection.name}-${modeName}`, variables };
-        collectionsToExport.push(result);
       }
+
+      const result = { name: collection.name, variables };
+      collectionsToExport.push(result);
     }
   }
 

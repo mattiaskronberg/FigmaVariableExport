@@ -135,20 +135,24 @@
       case "collectionsReady":
         console.log("Collections ready!");
         const blobs = [];
+        let textContents = [];
 
         data.forEach(c => {
-          var blob = getBlob(c.variables);
-          blobs.push({ name: c.name, blob: blob });
-        })
+          textContents.push(`<!-- ${c.name} -->`);
+          textContents.push(...c.variables);
+        });
+
+        const blob = getBlob(textContents);
+        blobs.push({ name: "exported_collections.txt", blob: blob });
 
         console.log("Collection count: " + data.length);
 
         blobs.forEach(b => {
-          downloadFile(b.blob, b.name)
-        })
+          downloadFile(b.blob, b.name);
+        });
 
         break;
-    }
+      }
   }
 
   document.getElementById('export').onclick = () => {
