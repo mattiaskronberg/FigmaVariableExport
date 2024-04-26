@@ -1,6 +1,36 @@
 <head>
 
   <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #333;
+      margin: 0;
+      padding: 24px;
+    }
+
+    h2 {
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    #export {
+      background-color: #18274a;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #checkboxContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     .checkboxes {
       display: inline-block;
     }
@@ -8,13 +38,23 @@
     .colCheckbox {
       border-radius: 15%;
     }
+
+    #buttons {
+      display: flex;
+      gap: 10px;
+      padding: 24px;
+    }
+
   </style>
 </head>
 <h2>Export .scheme</h2>
 <div id="checkboxContainer">
 
 </div>
-<button id="export">Export</button>
+<div id="buttons">
+
+  <button id="export">Export</button>
+</div>
 <script>
 
 
@@ -54,7 +94,7 @@
 
         data.forEach(c => {
           var blob = getBlob(c.variables);
-          blobs.push( {name: c.name, blob: blob } );
+          blobs.push({ name: c.name, blob: blob });
         })
 
         console.log("Collection count: " + data.length);
@@ -87,22 +127,8 @@
     return blob;
   }
 
-  async function zipFiles(blobs) {
-    
-
-    const zip = new JSZip();
-    
-    blobs.forEach(b => {
-      zip.file(b.name + ".scheme", b.blob)
-    })
-
-    const zipped = await zip.generateAsync({type: "blob"});
-    console.log("Zipping complete!");
-    return zipped;
-  }
-
   function downloadFile(file, filename) {
-  // Create an anchor element and set the href to the blob URL
+    // Create an anchor element and set the href to the blob URL
     const a = document.createElement('a');
     a.href = URL.createObjectURL(file);
     a.download = filename; // Set the desired file name
