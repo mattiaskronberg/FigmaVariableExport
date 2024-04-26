@@ -1,4 +1,5 @@
 <head>
+
   <style>
     .checkboxes {
       display: inline-block;
@@ -9,15 +10,15 @@
     }
   </style>
 </head>
-<h2>Getinge Colors</h2>
+<h2>Export .scheme</h2>
 <div id="checkboxContainer">
 
 </div>
-<p>Count: <input id="count" value="5"></p>
 <button id="export">Export</button>
 <script>
 
-  onmessage = (event) => {
+
+  onmessage = async (event) => {
 
     const { type, data } = event.data.pluginMessage;
 
@@ -33,7 +34,8 @@
           const label = document.createElement('label');
           label.className = "checkboxes";
           const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
+          checkbox.type = 'radio';
+          checkbox.name = 'collection';
           checkbox.className = 'colCheckbox';
           checkbox.value = collection.id;
           label.appendChild(checkbox);
@@ -48,11 +50,19 @@
 
       case "collectionsReady":
         console.log("Collections ready!");
+        const blobs = [];
+
         data.forEach(c => {
-          console.log("VARIABLES:");
-          console.log(c.variables);
-          downloadTextFile(c.variables, c.name);
+          var blob = getBlob(c.variables);
+          blobs.push( {name: c.name, blob: blob } );
         })
+
+        console.log("Collection count: " + data.length);
+
+        blobs.forEach(b => {
+          downloadFile(b.blob, b.name)
+        })
+
         break;
     }
   }
@@ -67,30 +77,35 @@
     parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
   }
 
-  function downloadTextFile(textContents, filename) {
+  function getBlob(textContents) {
     // Join the array elements into a single string with newline characters
     const text = textContents.join('\n');
 
     // Create a blob with the text content and specify the MIME type
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
 
-    // Create an anchor element and set the href to the blob URL
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename; // Set the desired file name
-
-    // Append the anchor to the body, click it to trigger the download, and then remove it
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    return blob;
   }
 
-  function zipFiles() {
+  async function zipFiles(blobs) {
+    
+
     const zip = new JSZip();
     
+    blobs.forEach(b => {
+      zip.file(b.name + ".scheme", b.blob)
+    })
+
+    const zipped = await zip.generateAsync({type: "blob"});
+    console.log("Zipping complete!");
+    return zipped;
   }
 
-  function downloadFile() {
+  function downloadFile(file, filename) {
+  // Create an anchor element and set the href to the blob URL
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = filename; // Set the desired file name
 
     document.body.appendChild(a);
     a.click();
